@@ -13,12 +13,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+        Parse.enableLocalDatastore()
         Parse.setApplicationId("your_application_id", clientKey: "your_client_key")
         PFUser.enableAutomaticUser()
-        let defaultACL = PFACL();
+        let defaultACL = PFACL()
         defaultACL.setPublicReadAccess(true);
+        PFACL.setDefaultACL(defaultACL, withAccessForCurrentUser: true)
+        
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let viewController = storyboard.instantiateInitialViewController() as ViewController
+        self.window?.rootViewController?.navigationController?.popToViewController(viewController, animated: false)
+        self.window?.makeKeyAndVisible()
+        
+//        self.testQuery()
         return true
     }
 
@@ -35,6 +43,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationWillTerminate(application: UIApplication) {
+    }
+
+    private func testQuery() {
+        let geoPoint = PFGeoPoint(latitude: 32.8, longitude: -117.15)
+        var query = PFQuery(className: "Question")
+        query.whereKey("location", nearGeoPoint:geoPoint)
+        query.findObjectsInBackgroundWithBlock { (objects: [AnyObject]!, error: NSError!) -> Void in
+            if (error != nil) {
+                print(error)
+            }
+            print(objects)
+        }
     }
 }
 
